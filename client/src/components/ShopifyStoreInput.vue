@@ -3,7 +3,7 @@
         <div class="popup">
             <h3>Please enter store name</h3>
             <input type="text" placeholder="Store Name" class="store-input" v-model="storeDomain">
-            <button  @click="submitStore" class="submit-btn">Submit</button>
+            <button  @click="$emit('submit-store', storeDomain)" class="submit-btn">Submit</button>
         </div>
     </div>
 </template>
@@ -17,24 +17,6 @@ export default {
   setup(_, { emit }) {
     const storeDomain = ref('');
     const popupContainer = ref(null);
-    const randomString = generateRandomString();
-    
-    function generateRandomString(length = 16) {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let randomString = '';
-        for (let i = 0; i < length; i++) {
-            randomString += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return randomString;
-    }
-
-    function submitStore() {
-      const storeLink = `https://${storeDomain.value}.myshopify.com/admin/oauth/authorize?client_id=${import.meta.env.VITE_API_KEY}&scope=${import.meta.env.VITE_SCOPES}&redirect_uri=${import.meta.env.VITE_REDIRECT_URI}&state=${randomString}`;
-      
-      window.open(storeLink, '_blank');
-      
-      emit('hide-popup');
-    }
 
     function closePopup(event) {
         if (event.target === popupContainer.value) {
@@ -45,7 +27,6 @@ export default {
     return {
         storeDomain,
         popupContainer,
-        submitStore,
         closePopup,
     }
   }

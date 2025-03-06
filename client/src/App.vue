@@ -1,12 +1,12 @@
 <template>
   <div>
     <ShopifyButton @show-popup="togglePopup"  />
-    <ShopifyStoreInput v-if="isPopupVisible" @hide-popup="togglePopup" />
+    <ShopifyStoreInput v-if="isPopupVisible" @hide-popup="togglePopup" @submit-store="submitStore" />
   </div>
 </template>
 
 <script>
-import { computed, onMounted  } from 'vue';
+import { ref, computed, onMounted  } from 'vue';
 import { json2csv } from 'json-2-csv';
 import ShopifyButton from './components/ShopifyButton.vue'
 import ShopifyStoreInput from './components/ShopifyStoreInput.vue'
@@ -16,40 +16,20 @@ export default {
     ShopifyButton,
     ShopifyStoreInput,
   },
-  data() {
-    return {
-      isPopupVisible: false,
-    };
-  },
-  methods: {
-    togglePopup() {
-      this.isPopupVisible = !this.isPopupVisible;
-    },
-  },
   setup() {
+    const isPopupVisible = ref(false);
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
     const queryParams = new URLSearchParams(window.location.search);
     const code = computed(() => queryParams.get('code'));
     const storeUrl = computed(() => queryParams.get('shop'));
     const storeName = storeUrl.value?.split('.')[0];
     
-    const getOrders = async () => {
-      if (!storeName) return;
+    const getOrders = async (storeName, code) => {
+      // if (!storeName) return;
       
-      const data = {
-        storeName: storeName,
-        code: code.value,
-      };
+      
 
       try {
-        const tokenResponse = await fetch(`${API_BASE_URL}/get-shopify-token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({...data}),
-        });
-
-        const tokenJson = await tokenResponse.json(); 
-
         const ordersResponse = await fetch(`${API_BASE_URL}/get-orders?storeName=${storeName}`, {
             method: 'GET',
             headers: {
@@ -97,15 +77,78 @@ export default {
       }
     }
 
+    function togglePopup() {
+      isPopupVisible.value = !isPopupVisible.value;
+    }
+
+    function generateRandomString(length = 16) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let randomString = '';
+        for (let i = 0; i < length; i++) {
+            randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return randomString;
+    }
+
+    const submitStore = async (storeName) => {
+      try {
+        const checkTokenResponse = await fetch(`${API_BASE_URL}/check-shopify-token?storeName=${storeName}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        const checkToken = await checkTokenResponse.json(); 
+        const isToken = checkToken.message == 'true';
+
+        if (isToken) {
+          const ordersData = await getOrders(storeName);
+      
+          if (ordersData) {
+            const csv = json2csv(ordersData);
+            const uploadOrders = await uploadCSV(csv)
+          }
+
+          togglePopup();
+        } else {
+          const randomString = generateRandomString();
+  
+          const storeLink = `https://${storeName}.myshopify.com/admin/oauth/authorize?client_id=${import.meta.env.VITE_API_KEY}&scope=${import.meta.env.VITE_SCOPES}&redirect_uri=${import.meta.env.VITE_REDIRECT_URI}&state=${randomString}`;
+          
+          window.location.href = storeLink;
+        } 
+      } catch (error) {
+        console.error('Error:', error);
+      }
+      
+    }
 
     onMounted(async () => {
-      const ordersData = await getOrders();
-      
-      if (ordersData) {
-        const csv = json2csv(ordersData);
-        const uploadOrders = await uploadCSV(csv)
+      if (code.value && storeName) {
+        const data = {
+          storeName: storeName,
+          code: code.value,
+        };
+        const tokenResponse = await fetch(`${API_BASE_URL}/get-shopify-token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({...data}),
+        });
+  
+        const tokenJson = await tokenResponse.json(); 
+        const ordersData = await getOrders(storeName);
+        
+        if (ordersData) {
+          const csv = json2csv(ordersData);
+          const uploadOrders = await uploadCSV(csv)
+        }
       }
     });
+
+    return {
+      isPopupVisible,
+      togglePopup,
+      submitStore
+    }
   }
 };
 </script>
