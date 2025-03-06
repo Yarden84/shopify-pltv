@@ -27,6 +27,7 @@ export default {
     },
   },
   setup() {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
     const queryParams = new URLSearchParams(window.location.search);
     const code = computed(() => queryParams.get('code'));
     const storeUrl = computed(() => queryParams.get('shop'));
@@ -41,7 +42,7 @@ export default {
       };
 
       try {
-        const tokenResponse = await fetch('http://localhost:5000/api/get-shopify-token', {
+        const tokenResponse = await fetch(`${API_BASE_URL}/get-shopify-token`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({...data}),
@@ -49,7 +50,7 @@ export default {
 
         const tokenJson = await tokenResponse.json(); 
 
-        const ordersResponse = await fetch(`http://localhost:5000/api/get-orders?storeName=${storeName}`, {
+        const ordersResponse = await fetch(`${API_BASE_URL}/get-orders?storeName=${storeName}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ export default {
 
     const uploadCSV = async (csv) => {
       try {
-        const response = await fetch('http://localhost:5000/api/upload-csv', {
+        const response = await fetch(`${API_BASE_URL}/upload-csv`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
