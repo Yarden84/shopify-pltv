@@ -41,7 +41,7 @@ export default {
       };
 
       try {
-        const tokenResponse = await fetch('http://localhost:5000/get-shopify-token', {
+        const tokenResponse = await fetch('http://localhost:5000/api/get-shopify-token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({...data}),
@@ -49,7 +49,7 @@ export default {
 
         const tokenJson = await tokenResponse.json(); 
 
-        const ordersResponse = await fetch(`http://localhost:5000/get-orders?storeName=${storeName}`, {
+        const ordersResponse = await fetch(`http://localhost:5000/api/get-orders?storeName=${storeName}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export default {
 
     const uploadCSV = async (csv) => {
       try {
-        const response = await fetch('http://localhost:5000/upload-csv', {
+        const response = await fetch('http://localhost:5000/api/upload-csv', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
