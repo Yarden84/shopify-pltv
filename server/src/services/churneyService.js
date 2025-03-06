@@ -23,7 +23,7 @@ const uploadCsvToChurney = async (csvFilePath) => {
         
         setTimeout(async () => {
             await analyzeData.click();
-        }, 1000);
+        }, 3000);
 
         console.log('File uploaded successfully!');
         return true;
