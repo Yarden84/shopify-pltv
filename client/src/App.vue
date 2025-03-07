@@ -24,11 +24,7 @@ export default {
     const storeUrl = computed(() => queryParams.get('shop'));
     const storeName = storeUrl.value?.split('.')[0];
     
-    const getOrders = async (storeName, code) => {
-      // if (!storeName) return;
-      
-      
-
+    const getOrders = async (storeName) => {
       try {
         const ordersResponse = await fetch(`${API_BASE_URL}/get-orders?storeName=${storeName}`, {
             method: 'GET',
