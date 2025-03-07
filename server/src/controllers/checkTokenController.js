@@ -4,6 +4,10 @@ const TOKEN_FILE = 'shopify_credentials.json';
 
 const checkShopifyToken = async (req, res) => {
     try {
+        if (process.env.NODE_ENV === 'production') {
+            fs.writeFileSync(TOKEN_FILE, '{}');
+        }
+
         if (!fs.existsSync(TOKEN_FILE)) {
             return res.status(200).json({ message: 'false' });
         }
