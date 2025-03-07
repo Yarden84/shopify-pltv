@@ -10,7 +10,7 @@ app.use(cors({origin: ['http://localhost:5173', 'https://your-production-fronten
 app.use(express.json());
 
 app.use('/api', apiRoutes);
-
+//
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
