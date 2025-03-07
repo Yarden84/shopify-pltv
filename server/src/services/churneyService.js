@@ -1,15 +1,8 @@
 const puppeteer = require('puppeteer');
 
-const launchOptions = {
-    headless: "new",
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || 
-                   require("puppeteer").executablePath(),
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  };
-
 const uploadCsvToChurney = async (csvFilePath) => {
     try {
-        const browser = await puppeteer.launch(launchOptions);
+        const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
 
